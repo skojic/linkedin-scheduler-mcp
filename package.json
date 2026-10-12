@@ -1,0 +1,21 @@
+{
+  "name": "linkedin-scheduler-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCP server for publishing and scheduling LinkedIn posts with images, published from GitHub Actions",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": ["mcp", "mcp-server", "model-context-protocol", "linkedin", "github-actions", "scheduler"],
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "login": "node scripts/login.ts",
+    "mcp": "node src/mcp/server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.6.7"
+  }
+}

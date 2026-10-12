@@ -1,0 +1,9 @@
+{
+  "timezone": "<IANA_TIME_ZONE>",
+  "windowMinutes": 135,
+  "minGapHours": 12,
+  "scheduleStartUtc": "05:00",
+  "scheduleEndUtc": "09:50",
+  "sourceDir": null,
+  "requireVerificationHeading": null
+}

@@ -1,0 +1,52 @@
+name: publish
+
+on:
+  schedule:
+    # Every 10 minutes from 05:07 to 09:57 UTC, off the hour on purpose: GitHub
+    # runs are busiest at the start of each hour. Keep this in sync with
+    # scheduleStartUtc / scheduleEndUtc in publisher.config.json.
+    - cron: "7,17,27,37,47,57 5-9 * * *"
+  workflow_dispatch:
+    inputs:
+      id:
+        description: "Queue id to publish now (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Skipped unless PUBLISHING_ENABLED is "true": the kill switch, and keeps the
+    # upstream template repository (no secrets, placeholder config) silent.
+    if: vars.PUBLISHING_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Unit tests
+        run: node --test test/*.test.ts
+      - name: Publish due post
+        run: node src/publisher.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          LINKEDIN_API_VERSION: ${{ vars.LINKEDIN_API_VERSION }}
+          LINKEDIN_SEND_ALT_TEXT: ${{ vars.LINKEDIN_SEND_ALT_TEXT }}
+          PUBLISHING_ENABLED: ${{ vars.PUBLISHING_ENABLED }}
+          DRY_RUN: ${{ vars.DRY_RUN }}
+          FORCE_ID: ${{ inputs.id }}
